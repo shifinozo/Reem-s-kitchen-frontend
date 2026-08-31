@@ -213,6 +213,8 @@ export default function StaffProfilePage() {
             <div className="mt-2.5 flex flex-wrap justify-center gap-1.5 sm:justify-start">
               <StatusBadge kind="account" status={user.accountStatus} />
               <StatusBadge kind="availability" status={user.availabilityStatus} />
+              {/* Set by an admin at approval — shown here, not editable. */}
+              {user.position && <StatusBadge kind="position" status={user.position} />}
             </div>
           </div>
 

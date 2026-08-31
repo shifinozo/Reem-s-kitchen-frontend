@@ -23,13 +23,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatCard } from '@/components/shared/StatCard';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { ApproveStaffDialog } from '@/components/admin/ApproveStaffDialog';
+import { STAFF_POSITIONS } from '@/lib/constants';
 import { UserAvatar } from '@/components/shared/UserAvatar';
 import { EmptyState, ErrorState } from '@/components/shared/EmptyState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useFetch } from '@/hooks/useApi';
 import { apiPatch, apiPost, toApiError } from '@/lib/api';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
-import type { Booking, User, Work } from '@/types';
+import type { Booking, StaffPosition, User, Work } from '@/types';
 
 interface StaffProfileResponse {
   staff: User;
@@ -52,20 +54,37 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
   const [action, setAction] = useState<'suspend' | 'reject' | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [approving, setApproving] = useState(false);
+
   const staff = data?.staff;
 
-  const setStatus = async (status: string, reason?: string) => {
+  const setStatus = async (status: string, reason?: string, position?: StaffPosition) => {
     setBusy(true);
     try {
       const response = await apiPatch(`/staff/${id}/status`, {
         accountStatus: status,
         reason,
+        position,
       });
       toast.success(response.message);
       await refetch();
     } catch (caught) {
       toast.error(toApiError(caught).message);
       throw caught;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Promote or reassign an already-approved staff member. */
+  const setPosition = async (position: StaffPosition) => {
+    setBusy(true);
+    try {
+      const response = await apiPatch(`/staff/${id}/position`, { position });
+      toast.success(response.message);
+      await refetch();
+    } catch (caught) {
+      toast.error(toApiError(caught).message);
     } finally {
       setBusy(false);
     }
@@ -190,7 +209,7 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
                 variant="success"
                 size="sm"
                 loading={busy}
-                onClick={() => setStatus('approved').catch(() => null)}
+                onClick={() => setApproving(true)}
               >
                 {!busy && <Check />}
                 Approve
@@ -213,7 +232,7 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
               variant="success"
               size="sm"
               loading={busy}
-              onClick={() => setStatus('approved').catch(() => null)}
+              onClick={() => setApproving(true)}
             >
               {!busy && <Check />}
               Reinstate
@@ -237,6 +256,7 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
             <div className="mt-2 flex flex-wrap gap-1.5">
               <StatusBadge kind="account" status={staff.accountStatus} />
               <StatusBadge kind="availability" status={staff.availabilityStatus} />
+              {staff.position && <StatusBadge kind="position" status={staff.position} />}
               {staff.experienceYears ? (
                 <Badge variant="outline">{staff.experienceYears} yrs experience</Badge>
               ) : null}
@@ -287,6 +307,36 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
                 </div>
               )}
             </dl>
+
+            {/*
+              Position is admin-controlled, so it is editable here rather than
+              on the staff member's own profile. Only meaningful once the
+              account is approved — the API rejects it otherwise.
+            */}
+            {staff.accountStatus === 'approved' && (
+              <div className="mt-4">
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Position
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {STAFF_POSITIONS.map((option) => {
+                    const current = staff.position === option.value;
+                    return (
+                      <Button
+                        key={option.value}
+                        size="sm"
+                        variant={current ? 'default' : 'outline'}
+                        disabled={busy || current}
+                        onClick={() => setPosition(option.value)}
+                      >
+                        {current && <Check />}
+                        {option.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {staff.skills && staff.skills.length > 0 && (
               <div className="mt-4">
@@ -504,6 +554,12 @@ export default function StaffProfilePage({ params }: { params: Promise<{ id: str
           }
         />
       )}
+
+      <ApproveStaffDialog
+        staff={approving ? staff : null}
+        onOpenChange={(open) => !open && setApproving(false)}
+        onConfirm={(position) => setStatus('approved', undefined, position)}
+      />
     </div>
   );
 }

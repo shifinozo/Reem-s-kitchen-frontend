@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { ApproveStaffDialog } from '@/components/admin/ApproveStaffDialog';
 import { UserAvatar } from '@/components/shared/UserAvatar';
 import { EmptyState, ErrorState } from '@/components/shared/EmptyState';
 import { Pagination } from '@/components/shared/Pagination';
@@ -26,8 +27,8 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useDebounced, useFetch } from '@/hooks/useApi';
 import { apiPatch, toApiError } from '@/lib/api';
 import { formatCurrency, formatDate, toQueryString } from '@/lib/utils';
-import { SKILL_OPTIONS } from '@/lib/constants';
-import type { User } from '@/types';
+import { SKILL_OPTIONS, STAFF_POSITIONS } from '@/lib/constants';
+import type { StaffPosition, User } from '@/types';
 
 function StaffList() {
   const searchParams = useSearchParams();
@@ -38,8 +39,10 @@ function StaffList() {
   );
   const [availability, setAvailability] = useState('all');
   const [skill, setSkill] = useState('all');
+  const [position, setPosition] = useState('all');
   const [page, setPage] = useState(1);
   const [rejecting, setRejecting] = useState<User | null>(null);
+  const [approving, setApproving] = useState<User | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounced(search);
@@ -53,19 +56,26 @@ function StaffList() {
         accountStatus,
         availabilityStatus: availability,
         skill,
+        position,
         sort: accountStatus === 'pending' ? 'createdAt' : '-createdAt',
       })}`,
-    [page, debouncedSearch, accountStatus, availability, skill],
+    [page, debouncedSearch, accountStatus, availability, skill, position],
   );
 
   const { data, meta, loading, error, refetch } = useFetch<{ staff: User[] }>(url);
 
-  const setStatus = async (staff: User, status: string, reason?: string) => {
+  const setStatus = async (
+    staff: User,
+    status: string,
+    reason?: string,
+    position?: StaffPosition,
+  ) => {
     setBusyId(staff._id);
     try {
       const response = await apiPatch(`/staff/${staff._id}/status`, {
         accountStatus: status,
         reason,
+        position,
       });
       toast.success(response.message);
       await refetch();
@@ -143,6 +153,23 @@ function StaffList() {
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor="staff-position">Position</Label>
+            <Select value={position} onValueChange={resetPage(setPosition)}>
+              <SelectTrigger id="staff-position">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any position</SelectItem>
+                {STAFF_POSITIONS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="staff-skill">Skill</Label>
             <Select value={skill} onValueChange={resetPage(setSkill)}>
               <SelectTrigger id="staff-skill">
@@ -211,6 +238,7 @@ function StaffList() {
                       <div className="mt-3 flex flex-wrap gap-1.5">
                         <StatusBadge kind="account" status={staff.accountStatus} />
                         <StatusBadge kind="availability" status={staff.availabilityStatus} />
+                        {staff.position && <StatusBadge kind="position" status={staff.position} />}
                       </div>
 
                       <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
@@ -245,7 +273,7 @@ function StaffList() {
                               variant="success"
                               className="flex-1"
                               loading={busy}
-                              onClick={() => setStatus(staff, 'approved').catch(() => null)}
+                              onClick={() => setApproving(staff)}
                             >
                               {!busy && <Check />}
                               Approve
@@ -285,7 +313,7 @@ function StaffList() {
                             variant="outline"
                             className="flex-1"
                             loading={busy}
-                            onClick={() => setStatus(staff, 'approved').catch(() => null)}
+                            onClick={() => setApproving(staff)}
                           >
                             Reinstate
                           </Button>
@@ -332,6 +360,14 @@ function StaffList() {
           }
         />
       )}
+
+      <ApproveStaffDialog
+        staff={approving}
+        onOpenChange={(open) => !open && setApproving(null)}
+        onConfirm={(position) =>
+          setStatus(approving!, 'approved', undefined, position)
+        }
+      />
     </div>
   );
 }

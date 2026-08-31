@@ -21,19 +21,29 @@ export const EVENT_TYPES = [
   'Other',
 ] as const;
 
+/**
+ * Rank in the catering team, assigned by an admin at approval.
+ * Must stay in sync with STAFF_POSITIONS in backend/src/utils/constants.js.
+ * Ordered junior → senior.
+ */
+export const STAFF_POSITIONS = [
+  { value: 'boy', label: 'Boy' },
+  { value: 'captain', label: 'Captain' },
+  { value: 'supervisor', label: 'Supervisor' },
+] as const;
+
+export const POSITION_LABELS: Record<string, string> = {
+  boy: 'Boy',
+  captain: 'Captain',
+  supervisor: 'Supervisor',
+};
+
+/** Must stay in sync with SKILL_OPTIONS in backend/src/utils/constants.js. */
 export const SKILL_OPTIONS = [
-  'Waiter / Service',
-  'Head Waiter',
-  'Buffet Service',
+  'Hosting',
+  'Service',
   'Kitchen Helper',
-  'Cook / Chef Assistant',
-  'Dishwashing',
-  'Cleaning',
-  'Setup & Decoration',
-  'Bartender',
-  'Barista',
-  'Delivery',
-  'Supervisor',
+  'Dishwasher',
 ] as const;
 
 export const PAYMENT_METHODS = [
@@ -140,6 +150,22 @@ export const AVAILABILITY_META: Record<AvailabilityStatus, BadgeTone> = {
   unavailable: {
     label: 'Unavailable',
     className: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+  },
+};
+
+/** Seniority reads left-to-right as the colour warms. */
+export const POSITION_META: Record<string, BadgeTone> = {
+  boy: {
+    label: 'Boy',
+    className: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
+  },
+  captain: {
+    label: 'Captain',
+    className: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300',
+  },
+  supervisor: {
+    label: 'Supervisor',
+    className: 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300',
   },
 };
 

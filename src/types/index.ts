@@ -34,6 +34,8 @@ export interface RatingBreakdown {
   behaviour: number;
 }
 
+export type StaffPosition = 'boy' | 'captain' | 'supervisor';
+
 export interface User {
   id: string;
   _id: string;
@@ -51,6 +53,8 @@ export interface User {
   experienceNote?: string;
   skills?: string[];
   availabilityStatus?: AvailabilityStatus;
+  /** Rank in the team, set by an admin at approval. Absent until approved. */
+  position?: StaffPosition;
 
   accountStatus: AccountStatus;
   statusReason?: string;

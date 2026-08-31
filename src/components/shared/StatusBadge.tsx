@@ -7,6 +7,7 @@ import {
   AVAILABILITY_META,
   ATTENDANCE_META,
   PAYMENT_STATUS_META,
+  POSITION_META,
 } from '@/lib/constants';
 import type {
   AccountStatus,
@@ -14,10 +15,18 @@ import type {
   AvailabilityStatus,
   BookingStatus,
   PaymentStatus,
+  StaffPosition,
   WorkStatus,
 } from '@/types';
 
-type Kind = 'work' | 'booking' | 'account' | 'availability' | 'attendance' | 'payment';
+type Kind =
+  | 'work'
+  | 'booking'
+  | 'account'
+  | 'availability'
+  | 'attendance'
+  | 'payment'
+  | 'position';
 
 const MAPS = {
   work: WORK_STATUS_META,
@@ -26,6 +35,7 @@ const MAPS = {
   availability: AVAILABILITY_META,
   attendance: ATTENDANCE_META,
   payment: PAYMENT_STATUS_META,
+  position: POSITION_META,
 } as const;
 
 interface StatusBadgeProps {
@@ -37,6 +47,7 @@ interface StatusBadgeProps {
     | AvailabilityStatus
     | AttendanceStatus
     | PaymentStatus
+    | StaffPosition
     | string
     | null;
   className?: string;

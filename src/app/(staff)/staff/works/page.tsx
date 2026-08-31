@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { BriefcaseBusiness, Filter, Search, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,8 @@ import { EmptyState, ErrorState } from '@/components/shared/EmptyState';
 import { Pagination } from '@/components/shared/Pagination';
 import { useDebounced, useFetch } from '@/hooks/useApi';
 import { toQueryString } from '@/lib/utils';
-import { EVENT_TYPES, SKILL_OPTIONS } from '@/lib/constants';
+import { EVENT_TYPES } from '@/lib/constants';
+import { useAuthStore } from '@/store/authStore';
 import type { Work } from '@/types';
 
 const INITIAL_FILTERS = {
@@ -33,6 +35,10 @@ const INITIAL_FILTERS = {
 };
 
 export default function AvailableWorksPage() {
+  // Listings are restricted server-side to these, so the skill filter only
+  // narrows within them.
+  const mySkills = useAuthStore((state) => state.user?.skills) ?? [];
+
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
@@ -83,7 +89,23 @@ export default function AvailableWorksPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Available works</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Browse open catering jobs and apply for the ones that fit your schedule.
+          {mySkills.length ? (
+            <>
+              Jobs matching your skills ({mySkills.join(', ')}). Update them in{' '}
+              <Link href="/staff/profile" className="font-medium text-primary hover:underline">
+                your profile
+              </Link>{' '}
+              to see different work.
+            </>
+          ) : (
+            <>
+              Add your skills in{' '}
+              <Link href="/staff/profile" className="font-medium text-primary hover:underline">
+                your profile
+              </Link>{' '}
+              to see the jobs you can take on.
+            </>
+          )}
         </p>
       </div>
 
@@ -137,6 +159,11 @@ export default function AvailableWorksPage() {
               </Select>
             </div>
 
+            {/*
+              Listings are already restricted to the viewer's own skills by the
+              API, so this only narrows within them. Offering the full list
+              would imply work is available that the server will never return.
+            */}
             <div className="space-y-1.5">
               <Label htmlFor="filter-skill">Skill required</Label>
               <Select value={filters.skill} onValueChange={(value) => setFilter('skill', value)}>
@@ -144,8 +171,8 @@ export default function AvailableWorksPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any skill</SelectItem>
-                  {SKILL_OPTIONS.map((skill) => (
+                  <SelectItem value="all">All my skills</SelectItem>
+                  {mySkills.map((skill) => (
                     <SelectItem key={skill} value={skill}>
                       {skill}
                     </SelectItem>
