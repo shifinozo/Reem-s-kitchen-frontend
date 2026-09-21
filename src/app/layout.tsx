@@ -16,6 +16,24 @@ export const metadata: Metadata = {
   },
   description:
     'Manage catering staff, publish work opportunities, track bookings, attendance and payments.',
+  /**
+   * Declared here rather than via the app/icon.png file convention, because
+   * only this form takes a `media` query — which is what lets the browser pick
+   * the light-on-dark mark for a dark UI. Browser support varies; the first
+   * entry is the fallback for those that ignore `media`.
+   */
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+      {
+        url: '/icon-dark.png',
+        type: 'image/png',
+        sizes: '512x512',
+        media: '(prefers-color-scheme: dark)',
+      },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export const viewport: Viewport = {

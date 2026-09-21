@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   BriefcaseBusiness,
   CalendarCheck,
-  ChefHat,
   LayoutDashboard,
   LogOut,
   QrCode,
@@ -15,6 +14,7 @@ import {
 import { toast } from 'sonner';
 
 import { AuthGuard } from '@/components/shared/AuthGuard';
+import { Logo } from '@/components/shared/Logo';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { UserAvatar } from '@/components/shared/UserAvatar';
@@ -57,9 +57,7 @@ function StaffShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <Link href="/staff/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <ChefHat className="h-4.5 w-4.5 text-primary-foreground" aria-hidden />
-            </div>
+            <Logo size={32} priority />
             <span className="text-sm font-semibold tracking-tight">Reem&apos;s Kitchen</span>
           </Link>
 

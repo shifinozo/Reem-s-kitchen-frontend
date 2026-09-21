@@ -1,13 +1,12 @@
 import Link from 'next/link';
-import { ChefHat, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/shared/Logo';
 
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-muted/30 px-4 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-        <ChefHat className="h-6 w-6 text-primary-foreground" aria-hidden />
-      </div>
+      <Logo size={48} priority />
 
       <p className="mt-6 text-sm font-semibold text-primary">404</p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight">Page not found</h1>

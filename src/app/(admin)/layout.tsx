@@ -8,7 +8,6 @@ import {
   BarChart3,
   BriefcaseBusiness,
   CalendarCheck,
-  ChefHat,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 
 import { AuthGuard } from '@/components/shared/AuthGuard';
+import { Logo } from '@/components/shared/Logo';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { UserAvatar } from '@/components/shared/UserAvatar';
@@ -87,9 +87,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex h-16 items-center gap-2.5 border-b border-white/10 px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-accent">
-          <ChefHat className="h-5 w-5 text-white" aria-hidden />
-        </div>
+        <Logo size={36} variant="on-dark" priority />
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold">Reem&apos;s Kitchen</p>
           <p className="text-[11px] text-sidebar-foreground/60">Admin Panel</p>

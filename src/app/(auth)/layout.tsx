@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChefHat } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 
 /** Shared shell for login / signup / invite screens. */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -8,9 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-5xl items-center px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <ChefHat className="h-5 w-5 text-primary-foreground" aria-hidden />
-            </div>
+            <Logo size={36} priority />
             <div className="leading-tight">
               <p className="text-sm font-semibold tracking-tight">Reem&apos;s Kitchen</p>
               <p className="text-[11px] text-muted-foreground">Staff Management</p>
