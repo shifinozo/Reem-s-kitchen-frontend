@@ -19,6 +19,7 @@ import { useAuthStore } from '@/store/authStore';
 import { apiPatch, toApiError } from '@/lib/api';
 import { changePasswordSchema, type ChangePasswordValues } from '@/lib/validations';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { ROLE_LABELS } from '@/lib/constants';
 import type { User } from '@/types';
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
@@ -166,7 +167,7 @@ export default function AdminProfilePage() {
 
             <Badge variant="secondary" className="mt-2.5">
               <ShieldCheck className="mr-1 h-3 w-3" aria-hidden />
-              {user.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+              {ROLE_LABELS[user.role] ?? user.role}
             </Badge>
 
             <p className="mt-3 text-xs text-muted-foreground">

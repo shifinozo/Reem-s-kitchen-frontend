@@ -174,7 +174,7 @@ export const inviteAdminSchema = z.object({
   name: z.string().trim().min(2, 'Enter their name').max(80),
   email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
   phone: phoneRules.optional().or(z.literal('')),
-  role: z.enum(['admin', 'super_admin']),
+  role: z.enum(['event_manager', 'finance_manager', 'admin', 'super_admin']),
 });
 export type InviteAdminValues = z.infer<typeof inviteAdminSchema>;
 

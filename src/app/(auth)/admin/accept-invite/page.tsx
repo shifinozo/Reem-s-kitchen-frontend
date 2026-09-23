@@ -16,11 +16,13 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import { apiGet, toApiError, type ApiErrorShape } from '@/lib/api';
 import { acceptInviteSchema, type AcceptInviteValues } from '@/lib/validations';
+import { ROLE_LABELS } from '@/lib/constants';
+import type { AdminRole } from '@/types';
 
 interface InvitePreview {
   name: string;
   email: string;
-  role: 'admin' | 'super_admin';
+  role: AdminRole;
 }
 
 function AcceptInviteForm() {
@@ -132,7 +134,7 @@ function AcceptInviteForm() {
           <p className="text-sm font-medium">{invite.name}</p>
           <p className="text-xs text-muted-foreground">{invite.email}</p>
           <Badge variant="secondary" className="mt-2">
-            {invite.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+            {ROLE_LABELS[invite.role] ?? invite.role}
           </Badge>
         </div>
       </CardHeader>

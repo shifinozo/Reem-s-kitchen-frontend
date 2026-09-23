@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { EmptyState, ErrorState } from '@/components/shared/EmptyState';
+import { ADMIN_ROLE_OPTIONS, ROLE_LABELS, ROLE_META } from '@/lib/constants';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useFetch } from '@/hooks/useApi';
 import { apiPost, apiDelete, toApiError } from '@/lib/api';
@@ -207,8 +208,8 @@ export default function ManageAdminsPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-                    <Badge variant="secondary">
-                      {invite.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                    <Badge variant="tone" className={ROLE_META[invite.role]?.className}>
+                      {ROLE_LABELS[invite.role] ?? invite.role}
                     </Badge>
                     <Badge variant="tone" className={STATUS_STYLES[invite.status]}>
                       {invite.status.charAt(0).toUpperCase() + invite.status.slice(1)}
@@ -303,17 +304,20 @@ export default function ManageAdminsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                    {ADMIN_ROLE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
+            {/* Describes whichever role is selected, so the consequences of
+                the choice are visible before the invitation is sent. */}
             <p className="rounded-lg bg-muted/60 p-2.5 text-xs text-muted-foreground">
-              A Super Admin can invite and remove other administrators. A regular
-              Admin can manage staff, works and bookings but cannot manage
-              administrator accounts.
+              {ADMIN_ROLE_OPTIONS.find((option) => option.value === watch('role'))?.description}
             </p>
           </form>
 

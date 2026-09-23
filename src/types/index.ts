@@ -1,6 +1,26 @@
 /* Shared domain types — mirrors backend/src/utils/constants.js */
 
-export type Role = 'staff' | 'admin' | 'super_admin';
+export type Role =
+  | 'staff'
+  | 'event_manager'
+  | 'finance_manager'
+  | 'admin'
+  | 'super_admin';
+
+/** Roles that reach the admin panel. Mirrors ADMIN_ROLES on the server. */
+export type AdminRole = Exclude<Role, 'staff'>;
+
+/**
+ * Named capabilities. The server is the authority — these exist so the UI can
+ * hide what a role cannot do, never as the only thing standing in its way.
+ */
+export type Permission =
+  | 'create_events'
+  | 'assign_staff'
+  | 'approve_staff'
+  | 'manage_payments'
+  | 'view_reports'
+  | 'manage_admins';
 export type AccountStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
 export type AvailabilityStatus = 'available' | 'busy' | 'unavailable';
 export type WorkStatus =
@@ -226,7 +246,7 @@ export interface AdminInvite {
   name: string;
   email: string;
   phone: string;
-  role: 'admin' | 'super_admin';
+  role: AdminRole;
   status: 'pending' | 'accepted' | 'expired' | 'revoked';
   expiresAt: string;
   acceptedAt?: string;

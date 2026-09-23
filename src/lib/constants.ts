@@ -1,11 +1,77 @@
 import type {
   AccountStatus,
+  AdminRole,
   AvailabilityStatus,
   AttendanceStatus,
   BookingStatus,
   PaymentStatus,
+  Permission,
+  Role,
   WorkStatus,
 } from '@/types';
+
+/**
+ * Admin-panel roles offered in the invite dialog, ordered least to most
+ * privileged. Must stay in sync with INVITABLE_ROLES on the server.
+ */
+export const ADMIN_ROLE_OPTIONS = [
+  {
+    value: 'event_manager',
+    label: 'Event Manager',
+    description: 'Creates events, assigns staff and views reports. Cannot approve staff or handle payments.',
+  },
+  {
+    value: 'finance_manager',
+    label: 'Finance Manager',
+    description: 'Handles payments and views reports. Cannot create events or manage staff.',
+  },
+  {
+    value: 'admin',
+    label: 'Admin',
+    description: 'Manages staff, events, bookings, payments and reports.',
+  },
+  {
+    value: 'super_admin',
+    label: 'Super Admin',
+    description: 'Full access, including inviting and removing other administrators.',
+  },
+] as const;
+
+export const ROLE_LABELS: Record<Role, string> = {
+  staff: 'Staff',
+  event_manager: 'Event Manager',
+  finance_manager: 'Finance Manager',
+  admin: 'Admin',
+  super_admin: 'Super Admin',
+};
+
+/**
+ * Mirrors ROLE_PERMISSIONS in backend/src/utils/constants.js.
+ *
+ * This is for hiding controls a role cannot use — the server enforces the
+ * same table on every request and remains the only thing that actually
+ * protects an endpoint.
+ */
+export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
+  super_admin: [
+    'create_events',
+    'assign_staff',
+    'approve_staff',
+    'manage_payments',
+    'view_reports',
+    'manage_admins',
+  ],
+  admin: ['create_events', 'assign_staff', 'approve_staff', 'manage_payments', 'view_reports'],
+  event_manager: ['create_events', 'assign_staff', 'view_reports'],
+  finance_manager: ['manage_payments', 'view_reports'],
+  staff: [],
+};
+
+/** True when `role` carries `permission`. */
+export function roleHasPermission(role: Role | undefined, permission: Permission): boolean {
+  if (!role) return false;
+  return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
+}
 
 export const EVENT_TYPES = [
   'Wedding',
@@ -116,6 +182,25 @@ export const BOOKING_STATUS_META: Record<BookingStatus, BadgeTone> = {
   no_show: {
     label: 'No Show',
     className: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+  },
+};
+
+export const ROLE_META: Record<AdminRole, BadgeTone> = {
+  event_manager: {
+    label: 'Event Manager',
+    className: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
+  },
+  finance_manager: {
+    label: 'Finance Manager',
+    className: 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300',
+  },
+  admin: {
+    label: 'Admin',
+    className: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  },
+  super_admin: {
+    label: 'Super Admin',
+    className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
   },
 };
 

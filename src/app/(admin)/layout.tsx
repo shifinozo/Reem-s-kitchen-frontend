@@ -34,18 +34,48 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/store/authStore';
 import { apiGet } from '@/lib/api';
+import { ROLE_LABELS, roleHasPermission } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
+/**
+ * `permission` hides a destination a role cannot use, so nobody is sent to a
+ * page that will only reject them. Items without one are open to every
+ * admin-panel role. The server enforces the same matrix on each request.
+ */
 const NAV = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/works', label: 'Works', icon: BriefcaseBusiness },
-  { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+  {
+    href: '/admin/works',
+    label: 'Works',
+    icon: BriefcaseBusiness,
+    permission: 'create_events' as const,
+  },
+  {
+    href: '/admin/bookings',
+    label: 'Bookings',
+    icon: CalendarCheck,
+    permission: 'assign_staff' as const,
+  },
   { href: '/admin/staff', label: 'Staff', icon: Users, badgeKey: 'pending' },
-  { href: '/admin/payments', label: 'Payments', icon: Wallet },
-  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+  {
+    href: '/admin/payments',
+    label: 'Payments',
+    icon: Wallet,
+    permission: 'manage_payments' as const,
+  },
+  {
+    href: '/admin/reports',
+    label: 'Reports',
+    icon: BarChart3,
+    permission: 'view_reports' as const,
+  },
+  {
+    href: '/admin/admins',
+    label: 'Administrators',
+    icon: ShieldCheck,
+    permission: 'manage_admins' as const,
+  },
 ];
-
-const SUPER_ADMIN_NAV = [{ href: '/admin/admins', label: 'Administrators', icon: ShieldCheck }];
 
 function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -82,7 +112,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     router.replace('/login');
   };
 
-  const navItems = [...NAV, ...(user?.role === 'super_admin' ? SUPER_ADMIN_NAV : [])];
+  const navItems = NAV.filter(
+    (item) => !item.permission || roleHasPermission(user?.role, item.permission),
+  );
 
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -142,7 +174,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{user?.fullName}</p>
             <p className="truncate text-[11px] text-sidebar-foreground/60">
-              {user?.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+              {user?.role ? ROLE_LABELS[user.role] : ''}
             </p>
           </div>
         </div>
@@ -217,7 +249,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                       My account
                     </Link>
                   </DropdownMenuItem>
-                  {user?.role === 'super_admin' && (
+                  {roleHasPermission(user?.role, 'manage_admins') && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin/admins">
                         <ShieldCheck />
@@ -247,7 +279,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard allow={['admin', 'super_admin']}>
+    <AuthGuard allow={['event_manager', 'finance_manager', 'admin', 'super_admin']}>
       <AdminShell>{children}</AdminShell>
     </AuthGuard>
   );
